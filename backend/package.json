@@ -7,7 +7,9 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "seed": "ts-node src/scripts/seed.ts",
+    "seed:clear": "ts-node src/scripts/clear-seed.ts"
   },
   "keywords": [],
   "author": "",
