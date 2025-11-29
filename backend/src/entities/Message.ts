@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Parent } from './Parent';
 import { Teacher } from './Teacher';
@@ -15,6 +16,17 @@ export enum MessageSender {
 }
 
 @Entity('messages')
+@Index('idx_message_parent', ['parentId'])
+@Index('idx_message_teacher', ['teacherId'])
+@Index('idx_message_sender', ['senderType'])
+@Index('idx_message_read', ['isRead'])
+@Index('idx_message_read_at', ['readAt'])
+@Index('idx_message_created_at', ['createdAt'])
+// Critical composite indexes for inbox queries
+@Index('idx_message_parent_read_created', ['parentId', 'isRead', 'createdAt'])
+@Index('idx_message_teacher_read_created', ['teacherId', 'isRead', 'createdAt'])
+@Index('idx_message_parent_created', ['parentId', 'createdAt'])
+@Index('idx_message_teacher_created', ['teacherId', 'createdAt'])
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;

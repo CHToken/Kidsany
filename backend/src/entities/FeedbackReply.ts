@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Feedback } from './Feedback';
 import { Parent } from './Parent';
@@ -16,6 +17,15 @@ export enum ReplySender {
 }
 
 @Entity('feedback_replies')
+@Index('idx_feedback_reply_feedback', ['feedbackId'])
+@Index('idx_feedback_reply_parent', ['parentId'])
+@Index('idx_feedback_reply_teacher', ['teacherId'])
+@Index('idx_feedback_reply_sender', ['senderType'])
+@Index('idx_feedback_reply_read', ['isRead'])
+@Index('idx_feedback_reply_created_at', ['createdAt'])
+// Composite indexes for threaded conversations
+@Index('idx_feedback_reply_feedback_created', ['feedbackId', 'createdAt'])
+@Index('idx_feedback_reply_feedback_read', ['feedbackId', 'isRead'])
 export class FeedbackReply {
   @PrimaryGeneratedColumn('uuid')
   id: string;

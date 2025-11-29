@@ -59,12 +59,32 @@ export const RATE_LIMIT_MESSAGES = {
   OTP: 'Too many OTP requests, please try again later.',
 };
 
-// Database Configuration
+// Database Configuration - Optimized for millions of users
 export const DATABASE_CONFIG = {
-  POOL_SIZE: isProduction ? 20 : 10,
-  CONNECTION_TIMEOUT: isProduction ? 30000 : 10000,
-  IDLE_TIMEOUT: 10000,
-  MAX_QUERY_EXECUTION_TIME: isProduction ? 5000 : 30000,
+  // Connection pooling for high performance
+  POOL_SIZE: isDevelopment ? 10 : isProduction ? 50 : 20,
+  MIN_POOL_SIZE: isDevelopment ? 2 : 10,
+  CONNECTION_TIMEOUT: isDevelopment ? 10000 : 30000,
+  IDLE_TIMEOUT: isDevelopment ? 30000 : 60000,
+  ACQUIRE_TIMEOUT: 60000, // Max time to acquire connection from pool
+
+  // Query optimization
+  STATEMENT_TIMEOUT: isProduction ? 30000 : 0, // Kill queries after 30s in production
+  ENABLE_QUERY_CACHE: !isDevelopment, // Enable query result caching
+  CACHE_DURATION: 300000, // 5 minutes
+
+  // Performance monitoring
+  MAX_QUERY_EXECUTION_TIME: isProduction ? 10000 : 0, // Log slow queries > 10s
+  ENABLE_QUERY_LOGGING: isDevelopment,
+  LOG_QUERY_PARAMETERS: isDevelopment,
+
+  // Read replicas (for future horizontal scaling)
+  ENABLE_READ_REPLICAS: isProduction,
+  READ_REPLICA_HOSTS: process.env.DB_READ_REPLICAS?.split(',') || [],
+
+  // Batch processing
+  DEFAULT_BATCH_SIZE: 1000,
+  MAX_BATCH_SIZE: 5000,
 };
 
 // Session Configuration
