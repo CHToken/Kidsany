@@ -11,6 +11,7 @@ import {
   clearTokenCookies,
 } from '../utils/jwt.utils';
 import { AppError } from '../middleware/error.middleware';
+import { FEATURES } from '../config/constants';
 
 const parentRepository = AppDataSource.getRepository(Parent);
 const notificationPrefRepository = AppDataSource.getRepository(
@@ -169,8 +170,8 @@ export class ParentAuthController {
       message: 'OTP sent successfully',
       data: {
         phoneNumber,
-        // In development, you might want to return OTP for testing
-        ...(process.env.NODE_ENV === 'development' && { otp }),
+        // In development, return OTP for testing
+        ...(FEATURES.RETURN_OTP_IN_RESPONSE && { otp }),
       },
     });
   }
@@ -281,7 +282,8 @@ export class ParentAuthController {
     res.status(200).json({
       success: true,
       message: 'Password reset instructions sent to your email',
-      ...(process.env.NODE_ENV === 'development' && { resetToken }),
+      // In development, return reset token for testing
+      ...(FEATURES.RETURN_RESET_TOKEN_IN_RESPONSE && { resetToken }),
     });
   }
 

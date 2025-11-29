@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 import { Teacher } from './Teacher';
@@ -16,6 +17,19 @@ export enum BehaviorType {
 }
 
 @Entity('behaviors')
+@Index('idx_behavior_student', ['studentId'])
+@Index('idx_behavior_teacher', ['teacherId'])
+@Index('idx_behavior_date', ['date'])
+@Index('idx_behavior_type', ['type'])
+@Index('idx_behavior_category', ['category'])
+@Index('idx_behavior_acknowledged', ['acknowledgedByParent'])
+@Index('idx_behavior_incident', ['isIncident'])
+@Index('idx_behavior_created_at', ['createdAt'])
+// Composite indexes for behavior tracking
+@Index('idx_behavior_student_date', ['studentId', 'date'])
+@Index('idx_behavior_student_type', ['studentId', 'type'])
+@Index('idx_behavior_student_acknowledged', ['studentId', 'acknowledgedByParent'])
+@Index('idx_behavior_student_type_date', ['studentId', 'type', 'date'])
 export class Behavior {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 import { Subject } from './Subject';
@@ -18,6 +19,16 @@ export enum SubmissionStatus {
 }
 
 @Entity('assignments')
+@Index('idx_assignment_student', ['studentId'])
+@Index('idx_assignment_subject', ['subjectId'])
+@Index('idx_assignment_due_date', ['dueDate'])
+@Index('idx_assignment_status', ['submissionStatus'])
+@Index('idx_assignment_created_at', ['createdAt'])
+// Composite indexes for assignment tracking
+@Index('idx_assignment_student_due', ['studentId', 'dueDate'])
+@Index('idx_assignment_student_status', ['studentId', 'submissionStatus'])
+@Index('idx_assignment_student_status_due', ['studentId', 'submissionStatus', 'dueDate'])
+@Index('idx_assignment_due_status', ['dueDate', 'submissionStatus'])
 export class Assignment {
   @PrimaryGeneratedColumn('uuid')
   id: string;

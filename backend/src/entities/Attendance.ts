@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 
@@ -16,6 +17,16 @@ export enum AttendanceStatus {
 }
 
 @Entity('attendances')
+@Index('idx_attendance_student', ['studentId'])
+@Index('idx_attendance_date', ['date'])
+@Index('idx_attendance_status', ['status'])
+@Index('idx_attendance_created_at', ['createdAt'])
+// Critical composite indexes for high-performance queries
+@Index('idx_attendance_student_date', ['studentId', 'date'])
+@Index('idx_attendance_student_status', ['studentId', 'status'])
+@Index('idx_attendance_student_date_status', ['studentId', 'date', 'status'])
+// For date range queries
+@Index('idx_attendance_date_student', ['date', 'studentId'])
 export class Attendance {
   @PrimaryGeneratedColumn('uuid')
   id: string;

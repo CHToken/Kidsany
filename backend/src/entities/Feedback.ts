@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 import { Teacher } from './Teacher';
@@ -20,6 +21,18 @@ export enum FeedbackCategory {
 }
 
 @Entity('feedbacks')
+@Index('idx_feedback_student', ['studentId'])
+@Index('idx_feedback_teacher', ['teacherId'])
+@Index('idx_feedback_category', ['category'])
+@Index('idx_feedback_read', ['isRead'])
+@Index('idx_feedback_read_at', ['readAt'])
+@Index('idx_feedback_created_at', ['createdAt'])
+@Index('idx_feedback_updated_at', ['updatedAt'])
+// Composite indexes for common queries
+@Index('idx_feedback_student_created', ['studentId', 'createdAt'])
+@Index('idx_feedback_student_category', ['studentId', 'category'])
+@Index('idx_feedback_student_read', ['studentId', 'isRead'])
+@Index('idx_feedback_teacher_created', ['teacherId', 'createdAt'])
 export class Feedback {
   @PrimaryGeneratedColumn('uuid')
   id: string;

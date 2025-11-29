@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Parent } from './Parent';
 import { Class } from './Class';
@@ -18,6 +19,15 @@ import { Feedback } from './Feedback';
 import { TermReport } from './TermReport';
 
 @Entity('students')
+@Index('idx_student_parent', ['parentId'])
+@Index('idx_student_class', ['classId'])
+@Index('idx_student_admission', ['admissionNumber'])
+@Index('idx_student_active', ['isActive'])
+@Index('idx_student_created_at', ['createdAt'])
+// Composite indexes for common query patterns
+@Index('idx_student_parent_active', ['parentId', 'isActive'])
+@Index('idx_student_class_active', ['classId', 'isActive'])
+@Index('idx_student_parent_class', ['parentId', 'classId'])
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   id: string;

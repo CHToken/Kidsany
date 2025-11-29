@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 import { Message } from './Message';
@@ -16,6 +17,15 @@ export enum AuthProvider {
 }
 
 @Entity('parents')
+@Index('idx_parent_email', ['email'])
+@Index('idx_parent_phone', ['phoneNumber'])
+@Index('idx_parent_active', ['isActive'])
+@Index('idx_parent_auth_provider', ['authProvider'])
+@Index('idx_parent_last_login', ['lastLogin'])
+@Index('idx_parent_created_at', ['createdAt'])
+// Composite indexes for common queries
+@Index('idx_parent_active_email', ['isActive', 'email'])
+@Index('idx_parent_active_phone', ['isActive', 'phoneNumber'])
 export class Parent {
   @PrimaryGeneratedColumn('uuid')
   id: string;

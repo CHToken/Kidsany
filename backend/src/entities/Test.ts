@@ -6,11 +6,22 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 import { Subject } from './Subject';
 
 @Entity('tests')
+@Index('idx_test_student', ['studentId'])
+@Index('idx_test_subject', ['subjectId'])
+@Index('idx_test_date', ['testDate'])
+@Index('idx_test_type', ['testType'])
+@Index('idx_test_created_at', ['createdAt'])
+// Critical composite indexes for performance analytics
+@Index('idx_test_student_date', ['studentId', 'testDate'])
+@Index('idx_test_student_subject', ['studentId', 'subjectId'])
+@Index('idx_test_student_subject_date', ['studentId', 'subjectId', 'testDate'])
+@Index('idx_test_subject_date', ['subjectId', 'testDate'])
 export class Test {
   @PrimaryGeneratedColumn('uuid')
   id: string;

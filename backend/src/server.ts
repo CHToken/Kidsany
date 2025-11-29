@@ -3,7 +3,8 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import * as dotenv from 'dotenv';
+import { config, isDevelopment, isProduction } from './config/environment';
+import { CORS_CONFIG, COOKIE_CONFIG } from './config/constants';
 import { AppDataSource } from './config/database';
 import { errorHandler } from './middleware/error.middleware';
 import { sanitizeInput, detectSQLInjection } from './middleware/validation.middleware';
@@ -16,10 +17,8 @@ import studentRoutes from './routes/student.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 
-dotenv.config();
-
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.port;
 
 // Security Middleware
 app.use(helmet()); // Helmet helps secure Express apps with various HTTP headers
@@ -27,10 +26,10 @@ app.use(helmet()); // Helmet helps secure Express apps with various HTTP headers
 // CORS Configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true, // Allow cookies
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: CORS_CONFIG.ORIGIN,
+    credentials: CORS_CONFIG.CREDENTIALS,
+    methods: CORS_CONFIG.METHODS,
+    allowedHeaders: CORS_CONFIG.ALLOWED_HEADERS,
   })
 );
 
@@ -39,7 +38,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie parser
-app.use(cookieParser(process.env.COOKIE_SECRET || 'your_cookie_secret'));
+app.use(cookieParser(config.cookie.secret));
 
 // Apply rate limiting to all routes
 app.use('/api/', apiLimiter);
@@ -85,8 +84,10 @@ const startServer = async () => {
     // Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📝 Environment: ${config.nodeEnv}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      console.log(`🌐 Frontend URL: ${config.frontendUrl}`);
+      console.log(`🔒 Security: ${isProduction ? 'Maximum' : isDevelopment ? 'Relaxed' : 'Production-like'}`);
     });
   } catch (error) {
     console.error('❌ Error starting server:', error);

@@ -6,10 +6,21 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Student } from './Student';
 
 @Entity('term_reports')
+@Index('idx_term_report_student', ['studentId'])
+@Index('idx_term_report_term', ['term'])
+@Index('idx_term_report_year', ['academicYear'])
+@Index('idx_term_report_date', ['reportDate'])
+@Index('idx_term_report_created_at', ['createdAt'])
+// Composite indexes for report retrieval
+@Index('idx_term_report_student_year', ['studentId', 'academicYear'])
+@Index('idx_term_report_student_term', ['studentId', 'term'])
+@Index('idx_term_report_student_year_term', ['studentId', 'academicYear', 'term'])
+@Index('idx_term_report_year_term', ['academicYear', 'term'])
 export class TermReport {
   @PrimaryGeneratedColumn('uuid')
   id: string;

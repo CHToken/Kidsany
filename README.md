@@ -39,22 +39,24 @@ cd backend
 # Install dependencies
 npm install
 
-# Create .env file from example
-cp .env.example .env
+# Create environment file for development
+cp .env.example .env.development
 
-# Update .env with your database credentials
-# DB_HOST=localhost
-# DB_PORT=5432
-# DB_USERNAME=postgres
-# DB_PASSWORD=your_password
-# DB_DATABASE=kidsany_db
-# JWT_SECRET=your_secret_key (generate with: openssl rand -base64 32)
+# Update .env.development with your database credentials
+# See ENVIRONMENTS.md for detailed configuration guide
 
-# Run database migrations (TypeORM will auto-create tables in development)
+# Generate strong secrets (recommended)
+openssl rand -base64 32  # Use for JWT_SECRET
+openssl rand -base64 32  # Use for JWT_REFRESH_SECRET
+openssl rand -base64 32  # Use for COOKIE_SECRET
+
+# Start development server (TypeORM will auto-create tables)
 npm run dev
 ```
 
 The backend will start on `http://localhost:5000`
+
+**📖 For detailed environment configuration, see [backend/ENVIRONMENTS.md](backend/ENVIRONMENTS.md)**
 
 ### 3. Frontend Setup
 
@@ -107,7 +109,9 @@ kidsany-parent-dashboard/
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── database.ts          # TypeORM configuration
+│   │   │   ├── database.ts          # TypeORM configuration
+│   │   │   ├── environment.ts       # Environment validator
+│   │   │   └── constants.ts         # Environment-specific constants
 │   │   ├── entities/                # Database entities
 │   │   │   ├── Parent.ts
 │   │   │   ├── Student.ts
@@ -131,21 +135,42 @@ kidsany-parent-dashboard/
 │   │   │   ├── rateLimiter.middleware.ts
 │   │   │   └── validation.middleware.ts
 │   │   ├── controllers/             # Route controllers
-│   │   │   └── auth.controller.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── parent.controller.ts
+│   │   │   ├── student.controller.ts
+│   │   │   ├── dashboard.controller.ts
+│   │   │   ├── attendance.controller.ts
+│   │   │   ├── progress.controller.ts
+│   │   │   ├── assignment.controller.ts
+│   │   │   ├── behavior.controller.ts
+│   │   │   ├── feedback.controller.ts
+│   │   │   ├── message.controller.ts
+│   │   │   ├── notification.controller.ts
+│   │   │   ├── report.controller.ts
+│   │   │   └── admin.controller.ts
 │   │   ├── routes/                  # API routes
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── parent.routes.ts
 │   │   │   ├── student.routes.ts
-│   │   │   └── dashboard.routes.ts
+│   │   │   ├── dashboard.routes.ts
+│   │   │   └── admin.routes.ts
 │   │   ├── services/                # Business logic
 │   │   ├── utils/                   # Utility functions
 │   │   │   ├── jwt.utils.ts
 │   │   │   ├── password.utils.ts
 │   │   │   └── otp.utils.ts
 │   │   └── server.ts                # Express app entry point
+│   ├── docs/                        # API documentation
+│   │   ├── API_README.md
+│   │   ├── openapi.yaml             # Swagger/OpenAPI spec
+│   │   └── Kidsany_API.postman_collection.json
 │   ├── package.json
 │   ├── tsconfig.json
-│   └── .env.example
+│   ├── ENVIRONMENTS.md              # Environment configuration guide
+│   ├── .env.example                 # Environment template
+│   ├── .env.development             # Development config (not in git)
+│   ├── .env.staging                 # Staging config (not in git)
+│   └── .env.production              # Production config (not in git)
 │
 └── frontend/
     ├── src/
@@ -235,6 +260,23 @@ kidsany-parent-dashboard/
 - `GET /notifications` - Get notifications
 - `PATCH /notifications/:notificationId/read` - Mark as read
 
+### Admin (`/api/admin`)
+- `GET /profile` - Get admin profile
+- `PUT /profile` - Update admin profile
+- `PUT /change-password` - Change password
+- `GET /settings` - Get all system settings
+- `GET /settings/:category` - Get specific setting category
+- `PUT /settings` - Update system settings
+- `PUT /settings/value` - Update specific setting value
+- `POST /settings/reset` - Reset settings to default
+- `POST /maintenance/toggle` - Toggle maintenance mode
+- `POST /features/:feature/toggle` - Toggle feature flag
+- `GET /statistics` - Get system statistics
+- `GET /settings/export` - Export settings as JSON
+- `POST /settings/import` - Import settings from JSON
+
+**📖 Full API documentation:** [backend/docs/API_README.md](backend/docs/API_README.md)
+
 ## 🛠️ Development
 
 ### Backend Development
@@ -262,19 +304,39 @@ npm run build
 npm run preview
 ```
 
-## 📝 Next Steps
+## 📝 Implementation Status
 
-### To complete the implementation:
+### ✅ Completed Backend Features:
 
-1. **Implement remaining controllers**:
-   - Parent profile controller
-   - Student controller
-   - Dashboard data controller
-   - Feedback controller
-   - Message controller
-   - Notification controller
+1. **All Controllers Implemented** (13 controllers):
+   - ✅ Authentication controller
+   - ✅ Parent profile controller
+   - ✅ Student controller
+   - ✅ Dashboard data controller
+   - ✅ Attendance controller
+   - ✅ Progress/Tests controller
+   - ✅ Assignment controller
+   - ✅ Behavior controller
+   - ✅ Feedback controller
+   - ✅ Message controller
+   - ✅ Notification controller
+   - ✅ Report controller
+   - ✅ Admin controller
 
-2. **Create frontend components**:
+2. **Multi-Environment Support**:
+   - ✅ Development, Staging, Production environments
+   - ✅ Type-safe configuration system
+   - ✅ Environment-specific behaviors
+   - ✅ Complete documentation (ENVIRONMENTS.md)
+
+3. **API Documentation**:
+   - ✅ Comprehensive API README
+   - ✅ OpenAPI/Swagger specification
+   - ✅ Postman collection (60+ endpoints)
+
+### 🚧 Next Steps:
+
+1. **Create frontend components**:
    - Login/Register pages
    - Dashboard home
    - Student cards
@@ -305,24 +367,53 @@ npm run preview
    - Deploy backend (e.g., Railway, Heroku, AWS)
    - Deploy frontend (e.g., Vercel, Netlify)
 
-## 🔧 Environment Variables
+## 🔧 Environment Configuration
 
-### Backend (.env)
-```env
-PORT=5000
-NODE_ENV=development
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-DB_DATABASE=kidsany_db
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=your_refresh_secret
-JWT_REFRESH_EXPIRES_IN=30d
-COOKIE_SECRET=your_cookie_secret
-FRONTEND_URL=http://localhost:5173
+### Multi-Environment Support
+
+The backend supports **three distinct environments**:
+
+1. **Development** (`.env.development`) - For local development
+   - Auto-sync database (no migrations needed)
+   - Detailed logging and debugging
+   - Relaxed security for testing
+   - OTP/tokens returned in API responses
+
+2. **Staging** (`.env.staging`) - For pre-production testing
+   - Production-like settings
+   - Real email/SMS services
+   - Migration-based database updates
+
+3. **Production** (`.env.production`) - For live deployment
+   - Maximum security settings
+   - Strict rate limiting
+   - No debug features
+   - Strong secrets required
+
+### Quick Start (Development)
+
+```bash
+# Copy example to development environment
+cp backend/.env.example backend/.env.development
+
+# Set environment variable
+export NODE_ENV=development
+
+# Start backend
+cd backend && npm run dev
 ```
+
+### Environment-Specific Features
+
+| Feature | Development | Staging | Production |
+|---------|-------------|---------|------------|
+| Auto-sync DB | ✅ | ❌ | ❌ |
+| Debug Logs | ✅ | ⚠️ | ❌ |
+| Rate Limiting | Relaxed | Strict | Strict |
+| Return OTP | ✅ | ❌ | ❌ |
+| Stack Traces | ✅ | ✅ | ❌ |
+
+**📖 Complete environment guide:** [backend/ENVIRONMENTS.md](backend/ENVIRONMENTS.md)
 
 ### Frontend (.env)
 ```env
