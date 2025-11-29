@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { FEATURES, ERROR_DETAIL_LEVEL } from '../config/constants';
 
 export class AppError extends Error {
   statusCode: number;
@@ -23,6 +24,7 @@ export const errorHandler = (
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
+      ...(ERROR_DETAIL_LEVEL.SHOW_STACK && { stack: err.stack }),
     });
   }
 
@@ -34,7 +36,7 @@ export const errorHandler = (
     return res.status(400).json({
       success: false,
       message: 'Validation error',
-      errors: err.message,
+      ...(ERROR_DETAIL_LEVEL.SHOW_VALIDATION && { errors: err.message }),
     });
   }
 
@@ -45,12 +47,20 @@ export const errorHandler = (
     });
   }
 
+  // Database errors
+  if (err.name === 'QueryFailedError') {
+    return res.status(500).json({
+      success: false,
+      message: 'Database operation failed',
+      ...(ERROR_DETAIL_LEVEL.SHOW_DB_ERRORS && { error: err.message }),
+    });
+  }
+
   // Default error response
   return res.status(500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production'
-      ? 'Internal server error'
-      : err.message,
+    message: FEATURES.DETAILED_ERRORS ? err.message : 'Internal server error',
+    ...(FEATURES.SHOW_STACK_TRACE && { stack: err.stack }),
   });
 };
 
