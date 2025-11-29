@@ -1,0 +1,1091 @@
+{
+	"info": {
+		"_postman_id": "kidsany-parent-dashboard-api",
+		"name": "Kidsany Parent Dashboard API",
+		"description": "Complete API documentation for Kidsany Parent Dashboard - A comprehensive system for parents to monitor student progress, attendance, behavior, and communication with teachers.\n\n## Features\n- 60+ REST API endpoints\n- JWT authentication with refresh tokens\n- Role-based access control\n- Real-time notifications\n- Comprehensive filtering and pagination\n\n## Base URL\n`http://localhost:5000/api`\n\n## Authentication\nMost endpoints require JWT authentication. Include the access token in the Authorization header:\n`Authorization: Bearer <your_access_token>`\n\nTokens are also stored in HTTP-only cookies automatically.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "studentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "teacherId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Server Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/health",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5000",
+							"path": ["health"]
+						},
+						"description": "Check if the server is running and healthy"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoints"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register with Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register a new parent account with email and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login with Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login with email and password. Returns access token and refresh token."
+					},
+					"response": []
+				},
+				{
+					"name": "Request OTP",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/request-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "request-otp"]
+						},
+						"description": "Request OTP for phone number login. In development mode, OTP is returned in response."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"+1234567890\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "verify-otp"]
+						},
+						"description": "Verify OTP and login"
+					},
+					"response": []
+				},
+				{
+					"name": "Request Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/request-password-reset",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "request-password-reset"]
+						},
+						"description": "Request password reset token via email"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"resetToken\": \"123456\",\n  \"newPassword\": \"NewSecurePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "reset-password"]
+						},
+						"description": "Reset password using reset token"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Logout and clear auth cookies"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for parents"
+		},
+		{
+			"name": "Parent Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/parent/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "profile"]
+						},
+						"description": "Get current parent's profile with linked students"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parent/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "profile"]
+						},
+						"description": "Update parent profile information"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Picture",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"profilePictureUrl\": \"https://example.com/profile.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parent/profile/picture",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "profile", "picture"]
+						},
+						"description": "Upload or update profile picture"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"OldPassword123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parent/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "change-password"]
+						},
+						"description": "Change account password"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification Preferences",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/parent/notification-preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "notification-preferences"]
+						},
+						"description": "Get notification preferences"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notification Preferences",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emailNotifications\": true,\n  \"smsNotifications\": false,\n  \"feedbackNotifications\": true,\n  \"testScoreNotifications\": true,\n  \"attendanceNotifications\": true,\n  \"behaviorNotifications\": true,\n  \"assignmentNotifications\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parent/notification-preferences",
+							"host": ["{{baseUrl}}"],
+							"path": ["parent", "notification-preferences"]
+						},
+						"description": "Update notification preferences"
+					},
+					"response": []
+				}
+			],
+			"description": "Parent profile management endpoints"
+		},
+		{
+			"name": "Students",
+			"item": [
+				{
+					"name": "Get All Students",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data.students.length > 0) {",
+									"        pm.collectionVariables.set('studentId', response.data.students[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": ["{{baseUrl}}"],
+							"path": ["students"]
+						},
+						"description": "Get all students linked to the parent account"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Details",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["students", "{{studentId}}"]
+						},
+						"description": "Get detailed information about a specific student"
+					},
+					"response": []
+				}
+			],
+			"description": "Student information endpoints"
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Home Dashboard",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/home/{{studentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "home", "{{studentId}}"]
+						},
+						"description": "Get comprehensive dashboard data including attendance, assignments, behavior, feedback, and tests"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Summary",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/summary/{{studentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "summary", "{{studentId}}"]
+						},
+						"description": "Get lightweight dashboard summary"
+					},
+					"response": []
+				}
+			],
+			"description": "Dashboard overview endpoints"
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Get Attendance Records",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/attendance/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "attendance", "{{studentId}}"],
+							"query": [
+								{"key": "startDate", "value": "2024-01-01", "disabled": true},
+								{"key": "endDate", "value": "2024-12-31", "disabled": true},
+								{"key": "status", "value": "present", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get attendance records with optional filtering by date range and status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance Chart",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/attendance/{{studentId}}/chart?period=month",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "attendance", "{{studentId}}", "chart"],
+							"query": [{"key": "period", "value": "month", "description": "week, month, or year"}]
+						},
+						"description": "Get attendance chart data for visualization"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Monthly Summary",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/attendance/{{studentId}}/monthly?year=2024",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "attendance", "{{studentId}}", "monthly"],
+							"query": [{"key": "year", "value": "2024"}]
+						},
+						"description": "Get attendance summary grouped by month"
+					},
+					"response": []
+				}
+			],
+			"description": "Attendance tracking endpoints"
+		},
+		{
+			"name": "Progress & Tests",
+			"item": [
+				{
+					"name": "Get Academic Progress",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/progress/{{studentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "progress", "{{studentId}}"]
+						},
+						"description": "Get academic progress grouped by subject"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tests",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/tests/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "tests", "{{studentId}}"],
+							"query": [
+								{"key": "subjectId", "value": "", "disabled": true},
+								{"key": "testType", "value": "", "disabled": true},
+								{"key": "startDate", "value": "", "disabled": true},
+								{"key": "endDate", "value": "", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all tests with optional filtering"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Test Details",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/test/:testId",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "test", ":testId"],
+							"variable": [{"key": "testId", "value": ""}]
+						},
+						"description": "Get detailed information about a specific test"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subject Comparison",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/progress/{{studentId}}/comparison",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "progress", "{{studentId}}", "comparison"]
+						},
+						"description": "Get subject-wise performance comparison with trends"
+					},
+					"response": []
+				}
+			],
+			"description": "Academic progress and test scores endpoints"
+		},
+		{
+			"name": "Assignments",
+			"item": [
+				{
+					"name": "Get All Assignments",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/assignments/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "assignments", "{{studentId}}"],
+							"query": [
+								{"key": "status", "value": "not_submitted", "disabled": true},
+								{"key": "subjectId", "value": "", "disabled": true},
+								{"key": "startDate", "value": "", "disabled": true},
+								{"key": "endDate", "value": "", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all assignments with filtering options"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Assignment Details",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/assignment/:assignmentId",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "assignment", ":assignmentId"],
+							"variable": [{"key": "assignmentId", "value": ""}]
+						},
+						"description": "Get detailed information about a specific assignment"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Upcoming Assignments",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/assignments/{{studentId}}/upcoming?days=7",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "assignments", "{{studentId}}", "upcoming"],
+							"query": [{"key": "days", "value": "7"}]
+						},
+						"description": "Get upcoming assignments in the next N days"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Overdue Assignments",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/assignments/{{studentId}}/overdue",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "assignments", "{{studentId}}", "overdue"]
+						},
+						"description": "Get all overdue assignments"
+					},
+					"response": []
+				}
+			],
+			"description": "Assignment management endpoints"
+		},
+		{
+			"name": "Behavior",
+			"item": [
+				{
+					"name": "Get Behavior Records",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/behavior/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "behavior", "{{studentId}}"],
+							"query": [
+								{"key": "type", "value": "positive", "disabled": true},
+								{"key": "category", "value": "", "disabled": true},
+								{"key": "startDate", "value": "", "disabled": true},
+								{"key": "endDate", "value": "", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get behavior records with filtering options"
+					},
+					"response": []
+				},
+				{
+					"name": "Acknowledge Behavior",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/behavior/:behaviorId/acknowledge",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "behavior", ":behaviorId", "acknowledge"],
+							"variable": [{"key": "behaviorId", "value": ""}]
+						},
+						"description": "Acknowledge a behavior record as parent"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Behavior Summary",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/behavior/{{studentId}}/summary?period=month",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "behavior", "{{studentId}}", "summary"],
+							"query": [{"key": "period", "value": "month"}]
+						},
+						"description": "Get behavior summary statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Behavior Trends",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/behavior/{{studentId}}/trends?months=6",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "behavior", "{{studentId}}", "trends"],
+							"query": [{"key": "months", "value": "6"}]
+						},
+						"description": "Get behavior trends over time"
+					},
+					"response": []
+				}
+			],
+			"description": "Behavior tracking endpoints"
+		},
+		{
+			"name": "Feedback",
+			"item": [
+				{
+					"name": "Get All Feedback",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/feedback/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "feedback", "{{studentId}}"],
+							"query": [
+								{"key": "category", "value": "academic", "disabled": true},
+								{"key": "isRead", "value": "false", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all feedback from teachers"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feedback Details",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/feedback/:feedbackId",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "feedback", ":feedbackId"],
+							"variable": [{"key": "feedbackId", "value": ""}]
+						},
+						"description": "Get detailed feedback with reply thread. Automatically marks as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Reply to Feedback",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Thank you for the feedback. We will work on this at home.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/feedback/:feedbackId/reply",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "feedback", ":feedbackId", "reply"],
+							"variable": [{"key": "feedbackId", "value": ""}]
+						},
+						"description": "Reply to teacher feedback"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feedback Replies",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/feedback/:feedbackId/replies",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "feedback", ":feedbackId", "replies"],
+							"variable": [{"key": "feedbackId", "value": ""}]
+						},
+						"description": "Get all replies for a feedback"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Feedback as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/feedback/:feedbackId/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "feedback", ":feedbackId", "read"],
+							"variable": [{"key": "feedbackId", "value": ""}]
+						},
+						"description": "Mark feedback as read"
+					},
+					"response": []
+				}
+			],
+			"description": "Teacher feedback endpoints"
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Get All Messages",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/messages?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "messages"],
+							"query": [
+								{"key": "isRead", "value": "false", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all messages grouped by teacher (conversation list)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Message Thread",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/messages/{{teacherId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "messages", "{{teacherId}}"],
+							"query": [
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get message thread with a specific teacher. Auto-marks messages as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"teacherId\": \"teacher_uuid_here\",\n  \"subject\": \"Question about homework\",\n  \"content\": \"I have a question about the math homework assigned today.\",\n  \"attachmentUrl\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "messages"]
+						},
+						"description": "Send a message to a teacher"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/messages/:messageId/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "messages", ":messageId", "read"],
+							"variable": [{"key": "messageId", "value": ""}]
+						},
+						"description": "Mark a message as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/messages/unread/count",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "messages", "unread", "count"]
+						},
+						"description": "Get unread message count"
+					},
+					"response": []
+				}
+			],
+			"description": "Direct messaging with teachers"
+		},
+		{
+			"name": "Term Reports",
+			"item": [
+				{
+					"name": "Get All Reports",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/reports/{{studentId}}?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "reports", "{{studentId}}"],
+							"query": [
+								{"key": "academicYear", "value": "2024", "disabled": true},
+								{"key": "term", "value": "Term 1", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all term reports for a student"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Details",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/report/:reportId",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "report", ":reportId"],
+							"variable": [{"key": "reportId", "value": ""}]
+						},
+						"description": "Get detailed information about a specific report"
+					},
+					"response": []
+				},
+				{
+					"name": "Download Report",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/report/:reportId/download",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "report", ":reportId", "download"],
+							"variable": [{"key": "reportId", "value": ""}]
+						},
+						"description": "Get download link for a term report"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Statistics",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/reports/{{studentId}}/statistics",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "reports", "{{studentId}}", "statistics"]
+						},
+						"description": "Get report statistics and trends"
+					},
+					"response": []
+				}
+			],
+			"description": "Term report endpoints"
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Get All Notifications",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications?limit=50&offset=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications"],
+							"query": [
+								{"key": "type", "value": "feedback", "disabled": true},
+								{"key": "isRead", "value": "false", "disabled": true},
+								{"key": "limit", "value": "50"},
+								{"key": "offset", "value": "0"}
+							]
+						},
+						"description": "Get all notifications with filtering options"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications/:notificationId/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications", ":notificationId", "read"],
+							"variable": [{"key": "notificationId", "value": ""}]
+						},
+						"description": "Mark a notification as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications/mark-all-read",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications", "mark-all-read"]
+						},
+						"description": "Mark all notifications as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications/:notificationId",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications", ":notificationId"],
+							"variable": [{"key": "notificationId", "value": ""}]
+						},
+						"description": "Delete a notification"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications/unread/count",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications", "unread", "count"]
+						},
+						"description": "Get unread notification count"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notifications by Type",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/notifications/by-type",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "notifications", "by-type"]
+						},
+						"description": "Get notifications grouped by type"
+					},
+					"response": []
+				}
+			],
+			"description": "In-app notification endpoints"
+		}
+	]
+}
