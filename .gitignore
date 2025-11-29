@@ -32,7 +32,7 @@ coverage/
 # Uploads
 uploads/
 *.pdf
-*.docx
+*.doc
 
 # Database
 *.db
