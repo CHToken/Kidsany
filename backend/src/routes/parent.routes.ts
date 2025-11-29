@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken, authorizeRole } from '../middleware/auth.middleware';
+import { ParentController } from '../controllers/parent.controller';
+import { asyncHandler } from '../middleware/error.middleware';
 
 const router = Router();
 
@@ -8,21 +10,13 @@ router.use(authenticateToken);
 router.use(authorizeRole('parent'));
 
 // Parent profile routes
-router.get('/profile', (req, res) => {
-  res.json({ message: 'Get parent profile' });
-});
-
-router.put('/profile', (req, res) => {
-  res.json({ message: 'Update parent profile' });
-});
+router.get('/profile', asyncHandler(ParentController.getProfile));
+router.put('/profile', asyncHandler(ParentController.updateProfile));
+router.post('/profile/picture', asyncHandler(ParentController.uploadProfilePicture));
+router.post('/change-password', asyncHandler(ParentController.changePassword));
 
 // Notification preferences
-router.get('/notification-preferences', (req, res) => {
-  res.json({ message: 'Get notification preferences' });
-});
-
-router.put('/notification-preferences', (req, res) => {
-  res.json({ message: 'Update notification preferences' });
-});
+router.get('/notification-preferences', asyncHandler(ParentController.getNotificationPreferences));
+router.put('/notification-preferences', asyncHandler(ParentController.updateNotificationPreferences));
 
 export default router;
