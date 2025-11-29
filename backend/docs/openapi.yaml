@@ -1,0 +1,638 @@
+openapi: 3.0.3
+info:
+  title: Kidsany Parent Dashboard API
+  version: 1.0.0
+  description: |
+    Complete REST API documentation for Kidsany Parent Dashboard - A comprehensive system for parents to monitor student progress, attendance, behavior, and communication with teachers.
+    
+    ## Features
+    - 60+ REST API endpoints
+    - JWT authentication with refresh tokens
+    - Role-based access control
+    - Real-time notifications
+    - Comprehensive filtering and pagination
+    
+    ## Authentication
+    Most endpoints require JWT authentication. Include the access token in the Authorization header:
+    `Authorization: Bearer <your_access_token>`
+    
+    Tokens are also stored in HTTP-only cookies automatically.
+    
+  contact:
+    name: Kidsany Support
+    email: support@kidsany.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+  - url: https://api.kidsany.com/api
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Parent Profile
+    description: Parent profile management
+  - name: Students
+    description: Student information
+  - name: Dashboard
+    description: Dashboard overview data
+  - name: Attendance
+    description: Attendance tracking
+  - name: Progress & Tests
+    description: Academic progress and test scores
+  - name: Assignments
+    description: Assignment management
+  - name: Behavior
+    description: Behavior tracking
+  - name: Feedback
+    description: Teacher feedback
+  - name: Messages
+    description: Direct messaging with teachers
+  - name: Reports
+    description: Term reports
+  - name: Notifications
+    description: In-app notifications
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error message
+        errors:
+          type: array
+          items:
+            type: object
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        admissionNumber:
+          type: string
+        profilePicture:
+          type: string
+          nullable: true
+        gender:
+          type: string
+        class:
+          type: object
+          nullable: true
+
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [present, absent, late, excused]
+        reason:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    Test:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        testType:
+          type: string
+        subject:
+          type: object
+        testDate:
+          type: string
+          format: date
+        score:
+          type: number
+        maxScore:
+          type: number
+        percentage:
+          type: number
+        grade:
+          type: string
+
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        subject:
+          type: object
+        dueDate:
+          type: string
+          format: date
+        submissionStatus:
+          type: string
+          enum: [not_submitted, submitted, graded, late]
+        score:
+          type: number
+          nullable: true
+        maxScore:
+          type: number
+          nullable: true
+
+    Behavior:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [positive, negative, neutral]
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        isIncident:
+          type: boolean
+        acknowledgedByParent:
+          type: boolean
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        message:
+          type: string
+        category:
+          type: string
+          enum: [academic, behavior, participation, general]
+        isRead:
+          type: boolean
+        teacher:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Server health check
+      description: Check if the server is running and healthy
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register with email
+      description: Register a new parent account with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firstName, lastName, email, password]
+              properties:
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: SecurePassword123!
+      responses:
+        '201':
+          description: Registration successful
+        '400':
+          description: Invalid input or email already exists
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login with email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+
+  /auth/request-otp:
+    post:
+      tags: [Authentication]
+      summary: Request OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber]
+              properties:
+                phoneNumber:
+                  type: string
+                  example: "+1234567890"
+      responses:
+        '200':
+          description: OTP sent successfully
+
+  /auth/verify-otp:
+    post:
+      tags: [Authentication]
+      summary: Verify OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber, otp]
+              properties:
+                phoneNumber:
+                  type: string
+                otp:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+      responses:
+        '200':
+          description: OTP verified, login successful
+        '400':
+          description: Invalid or expired OTP
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+
+  /parent/profile:
+    get:
+      tags: [Parent Profile]
+      summary: Get parent profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+    put:
+      tags: [Parent Profile]
+      summary: Update parent profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+
+  /parent/notification-preferences:
+    get:
+      tags: [Parent Profile]
+      summary: Get notification preferences
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Preferences retrieved
+    put:
+      tags: [Parent Profile]
+      summary: Update notification preferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailNotifications:
+                  type: boolean
+                smsNotifications:
+                  type: boolean
+                feedbackNotifications:
+                  type: boolean
+      responses:
+        '200':
+          description: Preferences updated
+
+  /students:
+    get:
+      tags: [Students]
+      summary: Get all students
+      description: Get all students linked to the parent account
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Students retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      students:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Student'
+
+  /students/{studentId}:
+    get:
+      tags: [Students]
+      summary: Get student details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Student details retrieved
+        '404':
+          description: Student not found
+
+  /dashboard/home/{studentId}:
+    get:
+      tags: [Dashboard]
+      summary: Get home dashboard
+      description: Get comprehensive dashboard data including attendance, assignments, behavior, feedback, and tests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dashboard data retrieved
+
+  /dashboard/attendance/{studentId}:
+    get:
+      tags: [Attendance]
+      summary: Get attendance records
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [present, absent, late, excused]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Attendance records retrieved
+
+  /dashboard/assignments/{studentId}:
+    get:
+      tags: [Assignments]
+      summary: Get all assignments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [not_submitted, submitted, graded, late]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Assignments retrieved
+
+  /dashboard/behavior/{studentId}:
+    get:
+      tags: [Behavior]
+      summary: Get behavior records
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [positive, negative, neutral]
+      responses:
+        '200':
+          description: Behavior records retrieved
+
+  /dashboard/feedback/{studentId}:
+    get:
+      tags: [Feedback]
+      summary: Get all feedback
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [academic, behavior, participation, general]
+      responses:
+        '200':
+          description: Feedback retrieved
+
+  /dashboard/messages:
+    get:
+      tags: [Messages]
+      summary: Get all messages
+      description: Get all messages grouped by teacher (conversation list)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Messages retrieved
+    post:
+      tags: [Messages]
+      summary: Send message
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [teacherId, content]
+              properties:
+                teacherId:
+                  type: string
+                  format: uuid
+                subject:
+                  type: string
+                content:
+                  type: string
+                attachmentUrl:
+                  type: string
+      responses:
+        '201':
+          description: Message sent
+
+  /dashboard/notifications:
+    get:
+      tags: [Notifications]
+      summary: Get all notifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [feedback, test_score, attendance, behavior, assignment, message, general]
+        - name: isRead
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Notifications retrieved

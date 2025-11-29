@@ -14,6 +14,7 @@ import authRoutes from './routes/auth.routes';
 import parentRoutes from './routes/parent.routes';
 import studentRoutes from './routes/student.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import adminRoutes from './routes/admin.routes';
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/parent', parentRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
